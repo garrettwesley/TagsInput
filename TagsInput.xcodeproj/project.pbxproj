@@ -11,6 +11,7 @@
 		684948A925A54D9A00D70B09 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 684948A825A54D9A00D70B09 /* ContentView.swift */; };
 		684948AB25A54D9E00D70B09 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 684948AA25A54D9E00D70B09 /* Assets.xcassets */; };
 		684948AE25A54D9E00D70B09 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 684948AD25A54D9E00D70B09 /* Preview Assets.xcassets */; };
+		684948B925A58EE400D70B09 /* CustomTextField.swift in Sources */ = {isa = PBXBuildFile; fileRef = 684948B825A58EE400D70B09 /* CustomTextField.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -20,6 +21,7 @@
 		684948AA25A54D9E00D70B09 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		684948AD25A54D9E00D70B09 /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
 		684948AF25A54D9E00D70B09 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		684948B825A58EE400D70B09 /* CustomTextField.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CustomTextField.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -54,6 +56,7 @@
 			children = (
 				684948A625A54D9A00D70B09 /* TagsInputApp.swift */,
 				684948A825A54D9A00D70B09 /* ContentView.swift */,
+				684948B825A58EE400D70B09 /* CustomTextField.swift */,
 				684948AA25A54D9E00D70B09 /* Assets.xcassets */,
 				684948AF25A54D9E00D70B09 /* Info.plist */,
 				684948AC25A54D9E00D70B09 /* Preview Content */,
@@ -140,6 +143,7 @@
 			files = (
 				684948A925A54D9A00D70B09 /* ContentView.swift in Sources */,
 				684948A725A54D9A00D70B09 /* TagsInputApp.swift in Sources */,
+				684948B925A58EE400D70B09 /* CustomTextField.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

@@ -9,11 +9,14 @@ import SwiftUI
 
 struct TagsInput: View {
     @State var tags: [String] = ["test"]
+    @State var test = ""
     
     var body: some View {
-        TagsController(tags: $tags, addTag: addTag, removeTag: removeTag)
+        VStack {
+            TagsController(tags: $tags, addTag: addTag, removeTag: removeTag)
+        }
     }
-    
+        
     func addTag(_ val: String) {
         tags.append(val)
     }
@@ -43,11 +46,11 @@ public struct TagsController: View {
     private let minWidth: CGFloat = 80
     
     func handleInput(_ val: String) {
+        selection = nil
         if val.count >= last.count {
             if val.last == " " {
-//                String.Index
                 let str = String(val[..<val.lastIndex(of: " ")!])
-                if !(tags.contains(str)) {
+                if !(tags.contains(str)) && str.trimmingCharacters(in: .whitespacesAndNewlines).count > 0 {
                     addTag(str)
                 }
                 text = ""
@@ -57,37 +60,38 @@ public struct TagsController: View {
         last = val
     }
     
+    func didDelete() {
+        if selection != nil {
+            removeTag(selection!)
+            selection = nil
+        } else if tags.count > 0 {
+            selection = tags.count - 1
+        }
+    }
+    
     public var body: some View {
         GeometryReader {geometry in
             ZStack(alignment: .topLeading) {
                 ForEach(tags.indices, id: \.self) { i in
                     Group {
-                        Text(tags[i])
-                            .padding(.vertical, 6)
-                            .padding(.horizontal, 12)
-                            .font(.body)
-                            .background(selection == i ? Color.red : Color.gray)
-                            .foregroundColor(Color.white)
-                            .cornerRadius(8)
+                        TagItem(active: $selection, index: i, text: tags[i])
                     }
                     .onTapGesture {
                         selection = i
                     }
-                    .padding(.leading, 8)
+                    .padding(.horizontal, 4)
                     .padding(.bottom, 4)
                     .background(backgroundView())
                     .offset(getOffset(at: i, geometry: geometry))
                 }
-                TextField("", text: $text)
-                    .frame(width: getWidth(from: geometry), height: 40)
-                    .background(Color(.lightGray))
-                    .disableAutocorrection(true)
-                    .autocapitalization(.none)
+                TagsTextField(text: $text, didDelete: didDelete)
+                    .frame(width: getWidth(from: geometry), height: 30)
                     .onChange(of: text, perform: handleInput)
                     .padding(.leading, 8)
                     .padding(.bottom, 4)
                     .background(backgroundView())
                     .offset(getInputOffset(geometry))
+                    .accentColor(selection == nil ? Color.blue : Color.clear)
                     .onTapGesture {
                         selection = nil
                     }
@@ -112,8 +116,8 @@ public struct TagsController: View {
             maxHeight = max(maxHeight, $1.height)
             return (x,y,maxHeight)
         }
-//        return max(g.size.width - x - 10, 80)
-        let spaceLeft = w - lastX - 10
+        
+        let spaceLeft = w - lastX - 15
         return spaceLeft > minWidth ? spaceLeft : w
     }
     
@@ -157,19 +161,24 @@ public struct TagsController: View {
 
 public struct TagItem: View {
     @State private var color: Color = Color.gray
-    @State var selected: Bool = false
+    @Binding var active: Int?
+    var index: Int
     var text: String
     
     public var body: some View {
         Text(text)
             .padding(.vertical, 6)
             .padding(.horizontal, 12)
-            .font(.body)
+            .font(.system(size: 14))
             .background(color)
-            .foregroundColor(selected ? Color.white : .black)
+            .foregroundColor(Color.white)
             .cornerRadius(8)
-            .onChange(of: selected, perform: { active in
-                self.color = active ? .red : .gray
+            .lineLimit(1)
+            .truncationMode(.tail)
+            .onChange(of: active, perform: { val in
+                withAnimation(.easeInOut(duration: 0.2)) {
+                    self.color = val == index ? .red : .gray
+                }
             })
     }
 }
