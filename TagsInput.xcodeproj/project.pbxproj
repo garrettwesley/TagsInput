@@ -14,6 +14,7 @@
 		684948B925A58EE400D70B09 /* CustomTextField.swift in Sources */ = {isa = PBXBuildFile; fileRef = 684948B825A58EE400D70B09 /* CustomTextField.swift */; };
 		6851B79925A794A70000726B /* NewInput.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6851B79825A794A70000726B /* NewInput.swift */; };
 		6851B79D25A799980000726B /* SwiftUILib.WrapStack in Frameworks */ = {isa = PBXBuildFile; productRef = 6851B79C25A799980000726B /* SwiftUILib.WrapStack */; };
+		6851B7A025A7BD550000726B /* FinalInputs.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6851B79F25A7BD550000726B /* FinalInputs.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -25,6 +26,7 @@
 		684948AF25A54D9E00D70B09 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		684948B825A58EE400D70B09 /* CustomTextField.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CustomTextField.swift; sourceTree = "<group>"; };
 		6851B79825A794A70000726B /* NewInput.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NewInput.swift; sourceTree = "<group>"; };
+		6851B79F25A7BD550000726B /* FinalInputs.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FinalInputs.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -62,6 +64,7 @@
 				684948A825A54D9A00D70B09 /* ContentView.swift */,
 				6851B79825A794A70000726B /* NewInput.swift */,
 				684948B825A58EE400D70B09 /* CustomTextField.swift */,
+				6851B79F25A7BD550000726B /* FinalInputs.swift */,
 				684948AA25A54D9E00D70B09 /* Assets.xcassets */,
 				684948AF25A54D9E00D70B09 /* Info.plist */,
 				684948AC25A54D9E00D70B09 /* Preview Content */,
@@ -154,6 +157,7 @@
 			files = (
 				684948A925A54D9A00D70B09 /* ContentView.swift in Sources */,
 				684948A725A54D9A00D70B09 /* TagsInputApp.swift in Sources */,
+				6851B7A025A7BD550000726B /* FinalInputs.swift in Sources */,
 				684948B925A58EE400D70B09 /* CustomTextField.swift in Sources */,
 				6851B79925A794A70000726B /* NewInput.swift in Sources */,
 			);
