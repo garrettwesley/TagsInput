@@ -3,7 +3,7 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 50;
+	objectVersion = 52;
 	objects = {
 
 /* Begin PBXBuildFile section */
@@ -12,6 +12,8 @@
 		684948AB25A54D9E00D70B09 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 684948AA25A54D9E00D70B09 /* Assets.xcassets */; };
 		684948AE25A54D9E00D70B09 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 684948AD25A54D9E00D70B09 /* Preview Assets.xcassets */; };
 		684948B925A58EE400D70B09 /* CustomTextField.swift in Sources */ = {isa = PBXBuildFile; fileRef = 684948B825A58EE400D70B09 /* CustomTextField.swift */; };
+		6851B79925A794A70000726B /* NewInput.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6851B79825A794A70000726B /* NewInput.swift */; };
+		6851B79D25A799980000726B /* SwiftUILib.WrapStack in Frameworks */ = {isa = PBXBuildFile; productRef = 6851B79C25A799980000726B /* SwiftUILib.WrapStack */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -22,6 +24,7 @@
 		684948AD25A54D9E00D70B09 /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
 		684948AF25A54D9E00D70B09 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		684948B825A58EE400D70B09 /* CustomTextField.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CustomTextField.swift; sourceTree = "<group>"; };
+		6851B79825A794A70000726B /* NewInput.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NewInput.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -29,6 +32,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				6851B79D25A799980000726B /* SwiftUILib.WrapStack in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -56,6 +60,7 @@
 			children = (
 				684948A625A54D9A00D70B09 /* TagsInputApp.swift */,
 				684948A825A54D9A00D70B09 /* ContentView.swift */,
+				6851B79825A794A70000726B /* NewInput.swift */,
 				684948B825A58EE400D70B09 /* CustomTextField.swift */,
 				684948AA25A54D9E00D70B09 /* Assets.xcassets */,
 				684948AF25A54D9E00D70B09 /* Info.plist */,
@@ -88,6 +93,9 @@
 			dependencies = (
 			);
 			name = TagsInput;
+			packageProductDependencies = (
+				6851B79C25A799980000726B /* SwiftUILib.WrapStack */,
+			);
 			productName = TagsInput;
 			productReference = 684948A325A54D9A00D70B09 /* TagsInput.app */;
 			productType = "com.apple.product-type.application";
@@ -115,6 +123,9 @@
 				Base,
 			);
 			mainGroup = 6849489A25A54D9A00D70B09;
+			packageReferences = (
+				6851B79B25A799980000726B /* XCRemoteSwiftPackageReference "wrap-stack" */,
+			);
 			productRefGroup = 684948A425A54D9A00D70B09 /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
@@ -144,6 +155,7 @@
 				684948A925A54D9A00D70B09 /* ContentView.swift in Sources */,
 				684948A725A54D9A00D70B09 /* TagsInputApp.swift in Sources */,
 				684948B925A58EE400D70B09 /* CustomTextField.swift in Sources */,
+				6851B79925A794A70000726B /* NewInput.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -332,6 +344,25 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		6851B79B25A799980000726B /* XCRemoteSwiftPackageReference "wrap-stack" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/swiftuilib/wrap-stack";
+			requirement = {
+				branch = develop;
+				kind = branch;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		6851B79C25A799980000726B /* SwiftUILib.WrapStack */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 6851B79B25A799980000726B /* XCRemoteSwiftPackageReference "wrap-stack" */;
+			productName = SwiftUILib.WrapStack;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 6849489B25A54D9A00D70B09 /* Project object */;
 }
