@@ -25,12 +25,14 @@ class DeleteTextField: UITextField {
 
 struct TagsTextField: UIViewRepresentable {
     @Binding var text: String
+    var fontSize: CGFloat
     var didDelete: () -> ()
 
     func makeUIView(context: Context) -> UITextField {
         let textField = DeleteTextField()
         textField.autocapitalizationType = .none
         textField.autocorrectionType = .no
+        textField.font = .systemFont(ofSize: fontSize)
         textField.delegate = context.coordinator
         textField.myDelegate = context.coordinator
         return textField

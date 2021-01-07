@@ -1,34 +1,22 @@
- //
- //  TagsInput.swift
- //  TagsInput
- //
- //  Created by Garrett Wesley on 1/5/21.
- //
+//
+//  TagsInput.swift
+//  TagsInput
+//
+//  Created by Garrett Wesley on 1/5/21.
+//
  
- import SwiftUI
- import Foundation
+import SwiftUI
+import Foundation
  
- struct TagsInput: View {
-    @State var tags: [String] = ["first", "second", "third", "fourth"]
-    @State var test = ""
+struct TagsInput: View {
+    @State var tags: [String] = []
     
     var body: some View {
-        VStack {
+        VStack(alignment: .leading, spacing: 0) {
             GeometryReader { geometry in
-                TestWrappedLayout(tags: $tags, geometry: geometry)
-                    .padding()
-                    .background(RoundedRectangle(cornerRadius: 10)
-                                    .stroke(Color.blue, lineWidth: 2)
-                    )
+                TagsController(tags: $tags, maxWidth: geometry.size.width - 24, addTag: addTag, removeTag: removeTag, shouldAddTag: shouldAddTag)
             }
-            GeometryReader { geometry in
-
-                TagsController(tags: $tags, geometry: geometry, addTag: addTag, removeTag: removeTag, shouldAddTag: shouldAddTag)
-                    .padding()
-                    .background(RoundedRectangle(cornerRadius: 10)
-                                    .stroke(Color.blue, lineWidth: 2)
-                    )
-            }
+            .padding(.horizontal, 20)
         }
     }
     
@@ -47,9 +35,9 @@
  
  struct TagsOptions {
     struct TagItemOptions {
-        let insets: EdgeInsets = .init(top: 6, leading: 12, bottom: 6, trailing: 12)
+        let insets: EdgeInsets = .init(top: 6, leading: 14, bottom: 6, trailing: 14)
         let cornerRadius: CGFloat = 8
-        let font: Font = .system(size: 14)
+        let fontSize: CGFloat = 14
         
         let textColor: Color = .white
         let selectedTextColor: Color = .white
@@ -58,11 +46,12 @@
     }
     
     let tagItemOptions: TagItemOptions = TagItemOptions()
+    let tagsInsets: EdgeInsets = .init(top: 6, leading: 12, bottom: 6, trailing: 12)
     let tintColor: Color = Color(UIColor.blue)
     let newTagCharacter: String = " "
-    let spaceBetweenTags: CGFloat = 4
-    let spaceBetweenLines: CGFloat = 4
-    let placeholder: String = "Tags..."
+    let spaceBetweenTags: CGFloat = 6
+    let spaceBetweenLines: CGFloat = 6
+    let placeholder: String = "Add a tag"
  }
  
  public struct TagsController: View {
@@ -75,17 +64,27 @@
     }
     
     @Binding var tags: [String]
-    let geometry: GeometryProxy
+    let maxWidth: CGFloat
     let addTag: (String) -> ()
     let removeTag: (Int) -> ()
     let shouldAddTag: (String, [String]) -> (Bool)
-    let options: TagsOptions = TagsOptions()
+    let options: TagsOptions
     
     @State private var sizes: [CGSize] = []
     @State private var text: String = ""
     @State private var last: String = ""
     @State private var selection: Int? = nil
-    private let minWidth: CGFloat = 80
+    private let minWidth: CGFloat = 60
+    
+    init(tags: Binding<[String]>, maxWidth: CGFloat, addTag: @escaping (String) -> (), removeTag: @escaping (Int) -> (), shouldAddTag: @escaping (String, [String]) -> (Bool), options: TagsOptions = TagsOptions()) {
+        self._tags = tags
+        self.addTag = addTag
+        self.removeTag = removeTag
+        self.shouldAddTag = shouldAddTag
+        self.maxWidth = maxWidth - options.tagsInsets.trailing - options.tagsInsets.leading
+        self.options = options
+        
+    }
     
     func handleInput(_ val: String) {
         selection = nil
@@ -102,7 +101,13 @@
         last = val
     }
     
-    func didDelete() {
+    func handleDelete(index: Int) {
+        selection = nil
+        removeTag(index)
+    }
+    
+    /// For when TextFields can detect the backspace key
+    private func didDelete() {
         if selection != nil {
             removeTag(selection!)
             selection = nil
@@ -112,244 +117,138 @@
     }
     
     public var body: some View {
-        ZStack(alignment: .topLeading) {
-            ForEach(tags.indices, id: \.self) { i in
-                Group {
-                    TagItem(active: $selection, index: i, text: tags[i], options: options.tagItemOptions)
-                }
-                .onTapGesture {
-                    selection = i
-                }
-                .padding(.trailing, options.spaceBetweenTags)
-                .padding(.bottom, options.spaceBetweenLines)
-                .background(backgroundView())
-                .offset(getOffset(at: i, geometry: geometry))
-            }
-            TagsTextField(text: $text, didDelete: didDelete)
-                .frame(width: getWidth(from: geometry), height: 30)
-                .onChange(of: text, perform: handleInput)
-                .padding(.horizontal, options.spaceBetweenLines)
-                .padding(.bottom, options.spaceBetweenLines)
-                .background(Color.gray)
-                .background(backgroundView())
-                .offset(getInputOffset(geometry))
-                .accentColor(selection == nil ? Color.blue : Color.clear)
-                .onTapGesture {
-                    selection = nil
-                }
-        }
-        .onPreferenceChange(SizePreferenceKey.self) {
-            self.sizes = $0
-        }
+        self.generateContent()
+            .padding(.vertical, 6)
+            .padding(.horizontal, 12)
+            .background(RoundedRectangle(cornerRadius: 10)
+                .stroke(Color.black, lineWidth: 2)
+            )
     }
     
-    private func getWidth(from g: GeometryProxy) -> CGFloat {
-        guard tags.count > 0 && sizes.count > 0 else { return g.size.width }
-        
-        let w = g.size.width
-        let (lastX, _, _) = sizes[..<(sizes.count - 1)].reduce((CGFloat.zero,CGFloat.zero,CGFloat.zero)) {
-            var (x,y,maxHeight) = $0
-            x += $1.width
-            if x > w {
-                x = $1.width
-                y += maxHeight
-                maxHeight = 0
-            }
-            maxHeight = max(maxHeight, $1.height)
-            return (x,y,maxHeight)
-        }
-        
-        let spaceLeft = w - lastX - (options.spaceBetweenTags * 2)
-        return spaceLeft > minWidth ? spaceLeft : w
-    }
-    
-    private func getInputOffset(_ g: GeometryProxy) -> CGSize {
-        guard sizes.count > 0 else { return .zero }
-        //        print("Total sizes:", sizes.count)
-        let res = getOffset(at: sizes.endIndex - 1, geometry: g)
-        //        print("Textfield width:", res)
-        return res
-    }
-    
-    private func getOffset(at index: Int, geometry: GeometryProxy) -> CGSize {
-        guard index < sizes.endIndex else { return .zero }
-        let frame = sizes[index]
-        var (x, y, maxHeight) = sizes[..<index].reduce((CGFloat.zero,CGFloat.zero,CGFloat.zero)) {
-            var (x, y, maxHeight) = $0
-            x += $1.width
-            if x > geometry.size.width {
-                x = $1.width
-                y += maxHeight
-                maxHeight = 0
-            }
-            maxHeight = max(maxHeight, $1.height)
-            return (x,y,maxHeight)
-        }
-        if x + frame.width > geometry.size.width {
-            x = 0
-            y += maxHeight
-        }
-        return .init(width: x, height: y)
-    }
-    
-    private func backgroundView() -> some View {
-        GeometryReader { geometry in
-            Rectangle()
-                .fill(Color.clear)
-                .preference(
-                    key: SizePreferenceKey.self,
-                    value: [geometry.frame(in: CoordinateSpace.global).size]
-                )
-        }
-    }
- }
- 
- public struct TagItem: View {
-    @State private var color: Color = Color.gray
-    @Binding var active: Int?
-    var opts: TagsOptions.TagItemOptions
-    var index: Int
-    var text: String
-    
-    init(active: Binding<Int?>, index: Int, text: String, options: TagsOptions.TagItemOptions) {
-        self._active = active
-        self.text = text
-        self.index = index
-        self.opts = options
-        self.color = options.backgroundColor
-    }
-    
-    public var body: some View {
-        Text(text)
-            .padding(opts.insets)
-            .font(opts.font)
-            .background(color)
-            .foregroundColor((active == index) ? opts.selectedTextColor : opts.textColor)
-            .cornerRadius(opts.cornerRadius)
-            .lineLimit(1)
-            .truncationMode(.tail)
-            .onChange(of: active, perform: { val in
-                withAnimation(.easeInOut(duration: 0.2)) {
-                    self.color = val == index ? opts.selectedColor : opts.backgroundColor
-                }
-            })
-    }
- }
- 
- struct TestWrappedLayout: View {
-    @Binding var tags: [String]
-    @State var text: String = ""
-    let geometry: GeometryProxy
-    
-    var body: some View {
-        self.generateContent(in: geometry)
-    }
-    
-    func didDelete() {
-        
-    }
-
-    
-    func generateContent(in g: GeometryProxy) -> some View {
-        let totalWidth = g.size.width
+    private func generateContent() -> some View {
         var currX = CGFloat.zero
         var currY = CGFloat.zero
         
         return ZStack(alignment: .topLeading) {
-            Group {
-                ForEach(tags, id: \.self) { tag in
-                    item(for: tag)
-                        .padding([.horizontal, .vertical], 4)
-                        .alignmentGuide(.leading, computeValue: { curr in
-                            print("calcing alignment", tag)
-                            if tag == self.tags.first! {
-                                currX = -curr.width
-                                return 0
-                            }
-                            
-                            if (abs(currX - curr.width) > totalWidth) {
-                                currX = 0
-                                currY -= curr.height
-                            }
-                            
-                            let result = currX
-                            currX -= curr.width
-                            
-                            return result
-                        })
-                        .alignmentGuide(.top, computeValue: { _ in
-                            if tag == self.tags.first! {
-                                currY = 0
-                            }
-                            return currY
-                        })
-                    }
-                TagsTextField(text: $text, didDelete: didDelete)
-                    .frame(width: calcInputWidth(totalWidth))
-                    .frame(height: 30)
-                    .background(Color.gray)
-                    .alignmentGuide(.leading, computeValue: { t in
-                        if (abs(currX - t.width) > totalWidth) {
-                            currX = 0
-                            currY -= t.height
+            ForEach(tags.indices, id: \.self) { i in
+                TagItem(active: $selection, index: i, text: tags[i], handleRemove: handleDelete, options: options.tagItemOptions)
+                    .padding(.trailing, options.spaceBetweenTags)
+                    .padding(.bottom, options.spaceBetweenLines)
+                    .onTapGesture { selection = i }
+                    .alignmentGuide(.leading, computeValue: { curr in
+                        if tags[i] == self.tags.first! {
+                            currX = -curr.width
+                            return 0
                         }
+                        
+                        if (abs(currX - curr.width) > maxWidth) {
+                            currX = 0
+                            currY -= curr.height
+                        }
+                        
                         let result = currX
-                        currX -= t.width
+                        currX -= curr.width
+                        
                         return result
                     })
-                    .alignmentGuide(.top, computeValue: { t in
-                        print("calcing alignment top for input")
+                    .alignmentGuide(.top, computeValue: { _ in
+                        if tags[i] == self.tags.first! {
+                            currY = 0
+                        }
                         return currY
                     })
-    //                .background(backgroundView())
-    //                .offset(getInputOffset(geometry))
-    //                .accentColor(selection == nil ? Color.blue : Color.clear)
-    //                .onTapGesture {
-    //                    selection = nil
-    //                }
-    //            )
             }
+//            TagsTextField(text: $text, fontSize: options.tagItemOptions.fontSize, didDelete: didDelete)
+            TextField(tags.isEmpty ? options.placeholder : "", text: $text)
+                .frame(width: calcInputWidth(), height: options.tagItemOptions.fontSize + options.tagItemOptions.insets.top + options.tagItemOptions.insets.bottom, alignment: .bottom)
+                .onChange(of: text, perform: handleInput)
+                .padding(.leading, options.spaceBetweenTags)
+                .padding(.bottom, options.spaceBetweenLines)
+                .background(Color.gray)
+                .disableAutocorrection(true)
+                .autocapitalization(.none)
+                .accentColor(selection == nil ? Color.blue : Color.clear)
+                .onTapGesture { selection = nil }
+                .alignmentGuide(.leading, computeValue: { t in
+                    print(maxWidth, "curr size:", t.width)
+                    if (abs(currX - t.width) > maxWidth) {
+                        currX = 0
+                        currY -= t.height
+                    }
+                    let result = currX
+                    currX -= t.width
+//                    print(result)
+                    return result
+                })
+                .alignmentGuide(.top, computeValue: { t in
+                    return tags.count > 0 ? currY : 0
+                })
         }
+        .frame(width: maxWidth)
     }
     
-    func calcInputWidth(_ totalWidth: CGFloat) -> CGFloat {
+    private func calcInputWidth() -> CGFloat {
         let (lastX) = tags.reduce((CGFloat.zero)) {
             var lastX = $0
-            let predictedWidth = $1.size(withAttributes:[.font: UIFont.systemFont(ofSize: 15.0)]).width + 2*5
-//            print($1, "length =", predictedWidth)
+            let predictedWidth = $1.size(withAttributes:[.font: UIFont.systemFont(ofSize: options.tagItemOptions.fontSize)]).width + options.tagItemOptions.insets.leading + options.tagItemOptions.insets.trailing + options.spaceBetweenTags
+            
             lastX += predictedWidth
-            if lastX > totalWidth {
+            if lastX > maxWidth {
                 lastX = predictedWidth
             }
             return lastX
         }
         
-        let res = abs(totalWidth - lastX) > 80 ? abs(totalWidth - lastX) : totalWidth
-//        print("Predicted width:", res)
+        let spaceLeft = maxWidth - lastX - (2 * options.spaceBetweenTags)
+        let res = spaceLeft > minWidth ? spaceLeft : maxWidth - (2*options.spaceBetweenTags)
+        print("keyboard width: ", res)
         return res
     }
-    
-    func item(for text: String) -> some View {
-        Text(text)
-            .padding(.all, 5)
-            .font(.system(size: 15))
-            .background(Color.blue)
-            .foregroundColor(Color.white)
-            .cornerRadius(5)
-    }
-    
-    func textField() -> some View {
-        return Text("")
-    }
- }
-
+}
  
- struct LazyView<Content: View>: View {
-     let build: () -> Content
-     init(_ build: @autoclosure @escaping () -> Content) {
-         self.build = build
-     }
-     var body: Content {
-         build()
-     }
- }
+public struct TagItem: View {
+    @State private var color: Color = Color.gray
+    @Binding var active: Int?
+    var opts: TagsOptions.TagItemOptions
+    var index: Int
+    var text: String
+    var handleRemove: (Int) -> ()
+    
+    init(active: Binding<Int?>, index: Int, text: String, handleRemove: @escaping (Int) -> (), options: TagsOptions.TagItemOptions) {
+        self._active = active
+        self.text = text
+        self.index = index
+        self.opts = options
+        self.handleRemove = handleRemove
+
+        self.color = options.backgroundColor
+    }
+    
+    public var body: some View {
+        ZStack(alignment: .center) {
+            Text(text)
+                .font(.system(size: opts.fontSize))
+                .foregroundColor((active == index) ? opts.selectedTextColor : opts.textColor)
+                .lineLimit(1)
+                .truncationMode(.tail)
+                .opacity((active == index) ? 0 : 1)
+            if active == index {
+                Button(action: { handleRemove(index) }) {
+                    Image(systemName: "x.circle")
+                        .font(.system(size: opts.fontSize))
+                        .foregroundColor(opts.selectedTextColor)
+                }
+                .opacity((active == index) ? 1 : 0)
+            }
+            
+        }
+        .padding(opts.insets)
+        .background(color)
+        .cornerRadius(opts.cornerRadius)
+        .onChange(of: active, perform: { val in
+            withAnimation(.easeInOut(duration: 0.1)) {
+                self.color = (val == index) ? opts.selectedColor : opts.backgroundColor
+            }
+        })
+    }
+}
