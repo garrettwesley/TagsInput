@@ -6,17 +6,30 @@
  //
  
  import SwiftUI
+ import Foundation
  
  struct TagsInput: View {
-    @State var tags: [String] = ["test"]
+    @State var tags: [String] = ["first", "second", "third", "fourth"]
     @State var test = ""
     
     var body: some View {
-        TagsController(tags: $tags, addTag: addTag, removeTag: removeTag, shouldAddTag: shouldAddTag)
-            .padding()
-            .background(RoundedRectangle(cornerRadius: 10)
-                .stroke(Color.blue, lineWidth: 2)
-            )
+        VStack {
+            GeometryReader { geometry in
+                TestWrappedLayout(tags: $tags, geometry: geometry)
+                    .padding()
+                    .background(RoundedRectangle(cornerRadius: 10)
+                                    .stroke(Color.blue, lineWidth: 2)
+                    )
+            }
+            GeometryReader { geometry in
+
+                TagsController(tags: $tags, geometry: geometry, addTag: addTag, removeTag: removeTag, shouldAddTag: shouldAddTag)
+                    .padding()
+                    .background(RoundedRectangle(cornerRadius: 10)
+                                    .stroke(Color.blue, lineWidth: 2)
+                    )
+            }
+        }
     }
     
     func addTag(_ val: String) {
@@ -62,6 +75,7 @@
     }
     
     @Binding var tags: [String]
+    let geometry: GeometryProxy
     let addTag: (String) -> ()
     let removeTag: (Int) -> ()
     let shouldAddTag: (String, [String]) -> (Bool)
@@ -98,33 +112,33 @@
     }
     
     public var body: some View {
-        GeometryReader { geometry in
-            ZStack(alignment: .topLeading) {
-                ForEach(tags.indices, id: \.self) { i in
-                    Group {
-                        TagItem(active: $selection, index: i, text: tags[i], options: options.tagItemOptions)
-                    }
-                    .onTapGesture {
-                        selection = i
-                    }
-                    .padding(.trailing, options.spaceBetweenTags)
-                    .padding(.bottom, options.spaceBetweenLines)
-                    .background(backgroundView())
-                    .offset(getOffset(at: i, geometry: geometry))
+        ZStack(alignment: .topLeading) {
+            ForEach(tags.indices, id: \.self) { i in
+                Group {
+                    TagItem(active: $selection, index: i, text: tags[i], options: options.tagItemOptions)
                 }
-                TagsTextField(text: $text, didDelete: didDelete)
-                    .frame(width: getWidth(from: geometry), height: 30)
-                    .onChange(of: text, perform: handleInput)
-                    .padding(.horizontal, options.spaceBetweenLines)
-                    .padding(.bottom, options.spaceBetweenLines)
-                    .background(backgroundView())
-                    .offset(getInputOffset(geometry))
-                    .accentColor(selection == nil ? Color.blue : Color.clear)
-                    .onTapGesture {
-                        selection = nil
-                    }
+                .onTapGesture {
+                    selection = i
+                }
+                .padding(.trailing, options.spaceBetweenTags)
+                .padding(.bottom, options.spaceBetweenLines)
+                .background(backgroundView())
+                .offset(getOffset(at: i, geometry: geometry))
             }
-        }.onPreferenceChange(SizePreferenceKey.self) {
+            TagsTextField(text: $text, didDelete: didDelete)
+                .frame(width: getWidth(from: geometry), height: 30)
+                .onChange(of: text, perform: handleInput)
+                .padding(.horizontal, options.spaceBetweenLines)
+                .padding(.bottom, options.spaceBetweenLines)
+                .background(Color.gray)
+                .background(backgroundView())
+                .offset(getInputOffset(geometry))
+                .accentColor(selection == nil ? Color.blue : Color.clear)
+                .onTapGesture {
+                    selection = nil
+                }
+        }
+        .onPreferenceChange(SizePreferenceKey.self) {
             self.sizes = $0
         }
     }
@@ -151,8 +165,10 @@
     
     private func getInputOffset(_ g: GeometryProxy) -> CGSize {
         guard sizes.count > 0 else { return .zero }
-        print(sizes.count)
-        return getOffset(at: sizes.endIndex - 1, geometry: g)
+        //        print("Total sizes:", sizes.count)
+        let res = getOffset(at: sizes.endIndex - 1, geometry: g)
+        //        print("Textfield width:", res)
+        return res
     }
     
     private func getOffset(at index: Int, geometry: GeometryProxy) -> CGSize {
@@ -218,4 +234,122 @@
                 }
             })
     }
+ }
+ 
+ struct TestWrappedLayout: View {
+    @Binding var tags: [String]
+    @State var text: String = ""
+    let geometry: GeometryProxy
+    
+    var body: some View {
+        self.generateContent(in: geometry)
+    }
+    
+    func didDelete() {
+        
+    }
+
+    
+    func generateContent(in g: GeometryProxy) -> some View {
+        let totalWidth = g.size.width
+        var currX = CGFloat.zero
+        var currY = CGFloat.zero
+        
+        return ZStack(alignment: .topLeading) {
+            Group {
+                ForEach(tags, id: \.self) { tag in
+                    item(for: tag)
+                        .padding([.horizontal, .vertical], 4)
+                        .alignmentGuide(.leading, computeValue: { curr in
+                            print("calcing alignment", tag)
+                            if tag == self.tags.first! {
+                                currX = -curr.width
+                                return 0
+                            }
+                            
+                            if (abs(currX - curr.width) > totalWidth) {
+                                currX = 0
+                                currY -= curr.height
+                            }
+                            
+                            let result = currX
+                            currX -= curr.width
+                            
+                            return result
+                        })
+                        .alignmentGuide(.top, computeValue: { _ in
+                            if tag == self.tags.first! {
+                                currY = 0
+                            }
+                            return currY
+                        })
+                    }
+                TagsTextField(text: $text, didDelete: didDelete)
+                    .frame(width: calcInputWidth(totalWidth))
+                    .frame(height: 30)
+                    .background(Color.gray)
+                    .alignmentGuide(.leading, computeValue: { t in
+                        if (abs(currX - t.width) > totalWidth) {
+                            currX = 0
+                            currY -= t.height
+                        }
+                        let result = currX
+                        currX -= t.width
+                        return result
+                    })
+                    .alignmentGuide(.top, computeValue: { t in
+                        print("calcing alignment top for input")
+                        return currY
+                    })
+    //                .background(backgroundView())
+    //                .offset(getInputOffset(geometry))
+    //                .accentColor(selection == nil ? Color.blue : Color.clear)
+    //                .onTapGesture {
+    //                    selection = nil
+    //                }
+    //            )
+            }
+        }
+    }
+    
+    func calcInputWidth(_ totalWidth: CGFloat) -> CGFloat {
+        let (lastX) = tags.reduce((CGFloat.zero)) {
+            var lastX = $0
+            let predictedWidth = $1.size(withAttributes:[.font: UIFont.systemFont(ofSize: 15.0)]).width + 2*5
+//            print($1, "length =", predictedWidth)
+            lastX += predictedWidth
+            if lastX > totalWidth {
+                lastX = predictedWidth
+            }
+            return lastX
+        }
+        
+        let res = abs(totalWidth - lastX) > 80 ? abs(totalWidth - lastX) : totalWidth
+//        print("Predicted width:", res)
+        return res
+    }
+    
+    func item(for text: String) -> some View {
+        Text(text)
+            .padding(.all, 5)
+            .font(.system(size: 15))
+            .background(Color.blue)
+            .foregroundColor(Color.white)
+            .cornerRadius(5)
+    }
+    
+    func textField() -> some View {
+        return Text("")
+    }
+ }
+
+ 
+ struct LazyView<Content: View>: View {
+     let build: () -> Content
+     init(_ build: @autoclosure @escaping () -> Content) {
+         self.build = build
+     }
+     var body: Content {
+         build()
+     }
  }
